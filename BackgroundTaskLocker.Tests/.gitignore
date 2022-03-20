@@ -1,0 +1,64 @@
+#Autosave files
+*~
+.idea/
+# Build.csproj
+build-env.vars
+
+#build
+[Oo]bj/
+[Bb]in/
+packages/
+TestResults/
+.vs/
+logs/
+artifacts/
+
+### Cake ###
+tools/*
+!tools/packages.config
+
+# globs
+Makefile.in
+*.DS_Store
+*.sln.cache
+*.suo
+*.cache
+*.pidb
+*.userprefs
+*.usertasks
+config.log
+config.make
+config.status
+aclocal.m4
+install-sh
+autom4te.cache/
+*.user
+*.tar.gz
+tarballs/
+test-results/
+Thumbs.db
+
+#Mac bundle stuff
+*.dmg
+*.app
+
+#resharper
+*_Resharper.*
+*.Resharper
+
+#dotCover
+*.dotCover
+
+node_modules/
+.idea/
+*.log
+
+.localhistory
+
+ClientApp/build/
+publish/
+build-version
+
+### Helm ###
+# Chart dependencies
+**/charts/*.tgz
