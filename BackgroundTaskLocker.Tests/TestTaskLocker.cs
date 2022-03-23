@@ -9,16 +9,6 @@ namespace BackgroundTaskLocker.Tests;
 
 public class TestTaskLocker : IntegrationTest
 {
-    private readonly TaskLockerConfiguration _firstLockerConfiguration = new()
-    {
-        ServiceId = 1
-    };
-
-    private readonly TaskLockerConfiguration _secondLockerConfiguration = new()
-    {
-        ServiceId = 2
-    };
-
     private readonly TimeSpan _backgroundTaskLockDuration = TimeSpan.FromMinutes(30);
 
     public TestTaskLocker()
@@ -29,7 +19,7 @@ public class TestTaskLocker : IntegrationTest
     [Fact]
     public void It_should_acquire_free_task()
     {
-        var taskLocker = ComposeSUT(_firstLockerConfiguration);
+        var taskLocker = ComposeSUT(serviceId: 1);
 
         var isAcquired = taskLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
 
@@ -37,38 +27,42 @@ public class TestTaskLocker : IntegrationTest
     }
 
     [Fact]
-    public void Second_worker_must_not_acquire_when_first_already_took()
+    public void Second_service_must_not_acquire_when_first_already_took()
     {
         // Arrange
-        var firstServiceLocker  = ComposeSUT(_firstLockerConfiguration);
-        var secondServiceLocker = ComposeSUT(_secondLockerConfiguration);
-        firstServiceLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
+        var firstTaskLocker  = ComposeSUT(serviceId: 1);
+        var secondTaskLocker = ComposeSUT(serviceId: 2);
+        firstTaskLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
 
         // Act
-        var isAcquired = secondServiceLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
+        var isAcquired = secondTaskLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
 
         // Assert
         isAcquired.Should().BeFalse();
     }
 
     [Fact]
-    public void Second_worker_must_acquire_when_first_released()
+    public void Second_service_must_acquire_when_first_released()
     {
         // Arrange
-        var firstServiceLocker  = ComposeSUT(_firstLockerConfiguration);
-        var secondServiceLocker = ComposeSUT(_secondLockerConfiguration);
-        firstServiceLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out var firstServiceLock);
+        var firstTaskLocker  = ComposeSUT(serviceId: 1);
+        var secondTaskLocker = ComposeSUT(serviceId: 2);
+        firstTaskLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out var firstServiceLock);
         firstServiceLock!.Release();
 
         // Act
-        var isAcquired = secondServiceLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
+        var isAcquired = secondTaskLocker.TryLock(BackgroundTask.UpdateUsersBlackList, _backgroundTaskLockDuration, out _);
 
         // Assert
         isAcquired.Should().BeTrue();
     }
 
-    private static TaskLocker ComposeSUT(TaskLockerConfiguration configuration)
+    private static TaskLocker ComposeSUT(long serviceId)
     {
+        var configuration = new TaskLockerConfiguration
+        {
+            ServiceId = serviceId
+        };
         return new TaskLocker(NhSessionFactory.Instance, configuration);
     }
 
