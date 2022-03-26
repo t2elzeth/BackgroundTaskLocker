@@ -76,7 +76,8 @@ update public.background_tasks t
  set service_id = null,
  expire_date = null,
  is_locked = false,
- lock_timestamp = null
+ lock_timestamp = null,
+ is_done = false
   where t.id = :id
 ";
         var parameters = new

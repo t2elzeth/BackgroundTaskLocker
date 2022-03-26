@@ -39,9 +39,11 @@ update public.background_tasks t
 set service_id = :serviceId,
 expire_date = :expireDateUTC,
 is_locked = true,
-lock_timestamp = :now
+lock_timestamp = :now,
+is_done = false
     where t.id = :id
     and (service_id = :serviceId or :now > expire_date or service_id is null)
+    and t.is_done = true
 ";
         var parameters = new
         {
@@ -96,6 +98,7 @@ update public.background_tasks t
         set service_id = null,
         expire_date = null,
         is_locked = false,
+        is_done = true,
         lock_timestamp = null
             where t.id = :id
 ";
